@@ -3,7 +3,7 @@ Ooyala-v2-sdk
 
 This Go SDK is simple re-implementation of the Ooyala client class sdks. As with the other sdks, it allows you to do GET, POST, PUT, PATCH and DELETE requests to the API as in the simple example below:
 
-```
+```Go
 package main
 
 import (
