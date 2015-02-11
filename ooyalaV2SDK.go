@@ -31,7 +31,7 @@ func NewApi(api_key, api_secret string, expires int64) *OoyalaApi {
 	return &api
 }
 
-// Api implements the Ooyala Api
+// OoyalaApi implements the Ooyala Api
 type OoyalaApi struct {
 	Params          map[string]string
 	BaseUrl         string
