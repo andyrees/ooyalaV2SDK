@@ -16,48 +16,48 @@ import (
 	"time"
 )
 
-// The NewApi Factory function returns a new api instance
-func NewApi(api_key, api_secret string, expires int64) *OoyalaApi {
+// NewAPI Factory function returns a new api instance.
+func NewAPI(apiKey, apiSecret string, expires int64) *OoyalaApi {
 	api := OoyalaApi{}
 	params := make(map[string]string)
-	params["api_key"] = api_key
+	params["api_key"] = apiKey
 	params["expires"] = fmt.Sprint(int64(time.Now().Unix() + expires))
 	api.Params = params
 
-	api.BaseUrl = "https://api.ooyala.com"
-	api.CacheBaseUrl = "https://cdn-api.ooyala.com"
-	api.Secret = api_secret
+	api.BaseURL = "https://api.ooyala.com"
+	api.CacheBaseURL = "https://cdn-api.ooyala.com"
+	api.Secret = apiSecret
 
 	return &api
 }
 
-// OoyalaApi implements the Ooyala Api
-type OoyalaApi struct {
+// OoyalaAPI implements the Ooyala Api
+type OoyalaAPI struct {
 	Params          map[string]string
-	BaseUrl         string
-	CacheBaseUrl    string
-	UsedBaseUrl     string
+	BaseURL         string
+	CacheBaseURL    string
+	UsedBaseURL     string
 	Secret          string
 	Body            string
-	Http_method     string
-	Request_path    string
+	HTTPMethod      string
+	RequestPath     string
 	Response        string
 	ResponseHeaders string
 	Filter          string
 	Signature       string
-	FinalUrl        string
+	FinalURL        string
 }
 
 // Request retry wrapper ensures success
 // eliminating transient errors
-func (a *OoyalaApi) send() error {
+func (a *OoyalaAPI) send() error {
 	currentRetry := 0
 	retryCount := 3
 
 	for {
 		err := a.sendRequest()
 		if err != nil {
-			currentRetry += 1
+			currentRetry++
 			if currentRetry > retryCount {
 				return err
 			}
@@ -67,22 +67,22 @@ func (a *OoyalaApi) send() error {
 	}
 }
 
-func (a *OoyalaApi) generateFinalUrl() {
+func (a *OoyalaAPI) generateFinalURL() {
 	if val, ok := a.Params["where"]; ok {
-		a.FinalUrl = fmt.Sprintf(
+		a.FinalURL = fmt.Sprintf(
 			"%s%s?api_key=%s&where=%s&signature=%s&expires=%s",
-			a.UsedBaseUrl,
-			a.Request_path,
+			a.UsedBaseURL,
+			a.RequestPath,
 			a.Params["api_key"],
 			url.QueryEscape(val),
 			a.Signature,
 			a.Params["expires"],
 		)
 	} else {
-		a.FinalUrl = fmt.Sprintf(
+		a.FinalURL = fmt.Sprintf(
 			"%s%s?api_key=%s&signature=%s&expires=%s",
-			a.UsedBaseUrl,
-			a.Request_path,
+			a.UsedBaseURL,
+			a.RequestPath,
 			a.Params["api_key"],
 			a.Signature,
 			a.Params["expires"],
@@ -92,31 +92,31 @@ func (a *OoyalaApi) generateFinalUrl() {
 	for key, value := range a.Params {
 		switch key {
 		case "user_permission":
-			a.FinalUrl += fmt.Sprintf("&%s=%s", key, value)
+			a.FinalURL += fmt.Sprintf("&%s=%s", key, value)
 		case "limit":
-			a.FinalUrl += fmt.Sprintf("&%s=%s", key, value)
+			a.FinalURL += fmt.Sprintf("&%s=%s", key, value)
 		case "page_token":
-			a.FinalUrl += fmt.Sprintf("&%s=%s", key, value)
+			a.FinalURL += fmt.Sprintf("&%s=%s", key, value)
 		case "include":
-			a.FinalUrl += fmt.Sprintf("&%s=%s", key, value)
+			a.FinalURL += fmt.Sprintf("&%s=%s", key, value)
 		}
 	}
 }
 
 // Send Http Request
-func (a *OoyalaApi) sendRequest() error {
+func (a *OoyalaAPI) sendRequest() error {
 	a.GenerateSignature()
 
-	a.UsedBaseUrl = a.CacheBaseUrl
+	a.UsedBaseURL = a.CacheBaseURL
 
-	if a.Http_method != "GET" {
-		a.UsedBaseUrl = a.BaseUrl
+	if a.HTTPMethod != "GET" {
+		a.UsedBaseURL = a.BaseURL
 	}
 
-	a.generateFinalUrl()
+	a.generateFinalURL()
 
 	client := &http.Client{}
-	request, err := http.NewRequest(a.Http_method, a.FinalUrl, bytes.NewReader([]byte(a.Body)))
+	request, err := http.NewRequest(a.HTTPMethod, a.FinalURL, bytes.NewReader([]byte(a.Body)))
 	if err != nil {
 		return err
 	}
@@ -154,16 +154,16 @@ func (a *OoyalaApi) sendRequest() error {
 	return nil
 }
 
-// View a resource
-func (a *OoyalaApi) Get() error {
-	a.Http_method = "GET"
+// Get or view a resource
+func (a *OoyalaAPI) Get() error {
+	a.HTTPMethod = "GET"
 	a.GenerateSignature()
 	return a.send()
 }
 
-// update or modify an existing resource
-func (a *OoyalaApi) Patch() error {
-	a.Http_method = "PATCH"
+// Patch or update an existing resource
+func (a *OoyalaAPI) Patch() error {
+	a.HTTPMethod = "PATCH"
 	if a.Body == "" {
 		return errors.New("NO DATA TO UPDATE")
 	}
@@ -171,9 +171,9 @@ func (a *OoyalaApi) Patch() error {
 	return a.send()
 }
 
-// create a new resource
-func (a *OoyalaApi) Post() error {
-	a.Http_method = "POST"
+// Post or create a new resource
+func (a *OoyalaAPI) Post() error {
+	a.HTTPMethod = "POST"
 	if a.Body == "" {
 		return errors.New("NO NEW ASSET DATA")
 	}
@@ -182,28 +182,28 @@ func (a *OoyalaApi) Post() error {
 	return a.send()
 }
 
-// replace an existing reource
-func (a *OoyalaApi) Put() error {
-	a.Http_method = "PUT"
+// Put or replace an existing reource
+func (a *OoyalaAPI) Put() error {
+	a.HTTPMethod = "PUT"
 	a.GenerateSignature()
 	return a.send()
 }
 
-// delete a resource
-func (a *OoyalaApi) Delete() error {
-	a.Http_method = "DELETE"
+// Delete a resource
+func (a *OoyalaAPI) Delete() error {
+	a.HTTPMethod = "DELETE"
 	a.GenerateSignature()
 	return a.send()
 }
 
-// Generates the signature for a request
-func (a *OoyalaApi) GenerateSignature() {
-	signature := a.Secret + a.Http_method + a.Request_path
+// GenerateSignature Generates the signature for a request
+func (a *OoyalaAPI) GenerateSignature() {
+	signature := a.Secret + a.HTTPMethod + a.RequestPath
 	hash := sha256.New()
 
 	var keys []string
 
-	for k, _ := range a.Params {
+	for k := range a.Params {
 		keys = append(keys, k)
 	}
 
