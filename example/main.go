@@ -2,20 +2,21 @@ package main
 
 import (
 	"fmt"
-	"github.com/andyrees/ooyalaV2SDK"
 	"log"
+
+	"github.com/andyrees/ooyalaV2SDK"
 )
 
-func createNewApiInstance() *ooyalaV2SDK.OoyalaApi {
-	api_secret := "<Your Secret Key>"
-	api_key := "<Your API Key>"
+func createNewAPIInstance() *ooyalaV2SDK.OoyalaApi {
+	apiSecret := "<Your Secret Key>"
+	apiKey := "<Your API Key>"
 	var expires int64 = 15 // set query to expire in 15 seconds
 
-	return ooyalaV2SDK.NewApi(api_key, api_secret, expires)
+	return ooyalaV2SDK.NewApi(apiKey, apiSecret, expires)
 }
 
 func main() {
-	api := createNewApiInstance()
+	api := createNewAPIInstance()
 	api.Request_path = "/v2/assets"
 	api.Params["include"] = "metadata"         // include metadata
 	api.Params["where"] = "asset_type='video'" // filter by asset type
