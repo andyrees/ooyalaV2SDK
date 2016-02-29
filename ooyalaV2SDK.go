@@ -17,8 +17,8 @@ import (
 )
 
 // NewAPI Factory function returns a new api instance.
-func NewAPI(apiKey, apiSecret string, expires int64) *OoyalaApi {
-	api := OoyalaApi{}
+func NewAPI(apiKey, apiSecret string, expires int64) *OoyalaAPI {
+	api := OoyalaAPI{}
 	params := make(map[string]string)
 	params["api_key"] = apiKey
 	params["expires"] = fmt.Sprint(int64(time.Now().Unix() + expires))
